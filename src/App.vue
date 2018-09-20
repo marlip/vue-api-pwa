@@ -2,7 +2,7 @@
     <v-app>
         <v-navigation-drawer persistent clipped v-model="drawer" enable-resize-watcher fixed app>
             <v-list dense>
-                <v-list-tile value="true" v-for="(item, i) in items" :key="i" :to="item.route">
+                <v-list-tile value="true" v-for="(item, i) in items" :key="i" :to="{ name: item.route }">
                     <v-list-tile-action>
                         <v-icon v-html="item.icon"></v-icon>
                     </v-list-tile-action>
@@ -17,6 +17,16 @@
             <v-toolbar-title v-text="title"></v-toolbar-title>
         </v-toolbar>
         <v-content>
+            <div class="notifications" v-if="notifications">
+                <v-alert
+                        :value="true"
+                        :type="notification.type"
+                        transition="fade-transition"
+                        @click="dismissNotification(notification.id)"
+                        v-for="(notification, i) in notifications" :key="i">
+                    {{ notification.message }} ({{ notification.type }})
+                </v-alert>
+            </div>
             <router-view/>
         </v-content>
     </v-app>
@@ -40,8 +50,29 @@
                         route: 'projects',
                     }
                 ],
-                title: 'taskr.'
+                title: 'taskr.',
+            }
+        },
+
+        computed: {
+            notifications () {
+                return this.$store.getters.notifications
+            }
+        },
+
+        methods: {
+            dismissNotification (index) {
+                this.$store.commit("markNotificationSeen", index)
             }
         }
     }
 </script>
+
+<style scoped>
+    .notifications {
+        position: fixed;
+        bottom: 20px;
+        right: 24px;
+        z-index: 3;
+    }
+</style>
